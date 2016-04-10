@@ -36,7 +36,6 @@
 
 <body>
 	<div class="reveal">
-
 		<!-- Any section element inside of this container is displayed as a slide -->
 		<div class="slides">
 			<section>
@@ -56,15 +55,14 @@
 				<h2>$ whoami</h2>
 				<h4>Frank Wisniewski</h4>
 				<ul>
-					<li>Futsal playing Engineer @Intuit</li>
+					<li>Futsal playing Engineer <a href="http://twitter.com/Intuit" target="_blank">@Intuit</a></li>
 					<li>Event-Driven &amp; Real Time Applications</li>
 					<li><a href="https://twitter.com/ultraknackig">@ultraknackig</a></li>
 				</ul>
 				<p/>
-
 				<h4>Lars Pfannenschmidt</h4>
 				<ul>
-					<li>Real Time Data Products @Intuit</li>
+					<li>Real Time Data Products <a href="http://twitter.com/Intuit" target="_blank">@Intuit</a></li>
 					<li>Founder of <a href="https://twitter.com/mobilecgn">@mobilecgn</a> User Group</li>
 					<li><a href="https://twitter.com/leastangle">@leastangle</a></li>
 				</ul>
@@ -80,6 +78,7 @@
 							<li>Topics &amp; Partitions</li>
 							<li>Offset Management</li>
 							<li>Log Compaction</li>
+							<li>Quotas</li>
 						</ul>
 					</div>
 					<div class="fragment">
@@ -90,6 +89,7 @@
 						</ul>
 					</div>
 					<li class="fragment">Performance</li>
+					<li class="fragment">Operations</li>
 					<li class="fragment">Summary</li>
 				</ul>
 			</section>
@@ -97,9 +97,8 @@
 			<section>
 				<section data-background="img/motivation.jpg">
 					<h1>Motivation</h1>
-					<small><a href="">lalala</a> by LALALA - Some rights reserved <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></small>
 					<aside class="notes">
-						interns Projekt LinkedIn; einheitliche Plattform zur Verarbeitung von großen Datenströmen;
+						"WTF! Y? gibt doch schon messaging was super und toll auch ist...", interns Projekt LinkedIn; einheitliche Plattform zur Verarbeitung von großen Datenströmen;
 					</aside>
 				</section>
 				<section>
@@ -124,7 +123,6 @@
 			<section>
 				<section data-background="img/concepts.jpg">
 					<h1>Concepts</h1>
-					<small><a href="">lalala</a> by LALALA - Some rights reserved <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></small>
 				</section>
 				<section>
 					<h2>Overview</h2>
@@ -156,12 +154,37 @@
 						Compression nicht m&ouml;glich
 					</aside>
 				</section>
+				<section>
+					<h2>Quotas</h2>
+					<ul>
+						<li class="fragment">
+							Set Broker default (in bytes/sec)
+							<pre><code data-trim class="bash">
+quota.producer.default=10485760
+quota.consumer.default=10485760
+							</code></pre>
+						</li>
+						<li class="fragment">
+							 Custom quotas per client
+							<pre><code data-trim class="bash">
+$ kafka-configs.sh --zookeeper 127.0.0.1:2181 --alter
+--add-config 'producer_byte_rate=4096,consumer_byte_rate=4096'
+--entity-name client123 --entity-type clients
+							</code></pre>
+						</li>
+					</ul>
+					<div>
+						<small class="fragment">Don't forget to set the client id :)</small>
+					</div>
+					<aside class="notes">
+						Shared Infrastructure, bad clients, DoS. Quote is per Broker, not Cluster!
+					</aside>
+				</section>
 			</section>
 
 			<section>
-				<section data-background="img/examples.jpg">
-					<h1>Example</h1>
-					<small><a href="">lalala</a> by LALALA - Some rights reserved <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></small>
+				<section data-background="img/example.jpg">
+					<!--<h1>Example</h1>-->
 				</section>
 				<section>
 					<h2>Java Producer</h2>
@@ -174,6 +197,7 @@ public class News {
 					</code></pre>
 					<pre class="fragment"><code data-trim class="java">
 Properties config = new Properties();
+config.put(ProducerConfig.CLIENT_ID_CONFIG, "NewsProducer");
 config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, broker);
 config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, NewsSerializer.class.getName());
@@ -319,7 +343,6 @@ for (final KafkaStream stream : streams) {
 			<section>
 				<section data-background="img/performance.jpg">
 					<h1>Performance</h1>
-					<small><a href="">lalala</a> by LALALA - Some rights reserved <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></small>
 					<aside class="notes">
 						16 Mrd Nachrichten am Tag.<br>Limit REST, nicht Kafka.<br>Das ganze Setup 200.000TPS
 					</aside>
@@ -378,36 +401,83 @@ for (final KafkaStream stream : streams) {
 			</section>
 		</section>
 		<section>
+			<section data-background="img/operations.jpg">
+				<h1>Operations</h1>
+				<aside class="notes">
+				</aside>
+			</section>
+			<section>
+				<h2>Broker</h2>
+				<ul>
+					<li class="fragment"><code>-XX:+UseG1GC</code> FTW</li>
+					<li class="fragment"><code>unclean.leader.election.enable=false</code></li>
+					<li class="fragment"><code>default.replication.factor=3</code></li>
+					<li class="fragment"><code>min.insync.replicas=2</code></li>
+				</ul>
+				<aside class="notes">
+					Jepsen?
+				</aside>
+			</section>
+			<section>
+				<h2>Producer</h2>
+				<ul>
+					<li class="fragment"><code>acks=all</code></li>
+					<li class="fragment"><code>block.on.buffer.full=true</code></li>
+					<li class="fragment"><code>retries=Integer.MAX_VALUE</code></li>
+					<li class="fragment"><code>max.in.flight.requests.per.connection=1</code></li>
+					<li class="fragment"><code>KafkaProducer.close()</code></li>
+				</ul>
+				<h2 class="fragment">Consumer</h2>
+				<ul>
+					<li class="fragment"><code>enable.auto.commit=false</code></li>
+				</ul>
+				<aside class="notes">
+					Commit after processing
+				</aside>
+			</section>
+		</section>
+		<section>
 			<section data-background="img/summary.jpg">
 				<h1>Summary</h1>
-				<small><a href="https://flic.kr/p/ifz6wb">Numbers And Finance</a> by reynermedia - Some rights reserved <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></small>
 			</section>
 			<section>
 				<h2>Key Features &amp; Facts</h2>
 				<ul>
 					<li class="fragment"><b>Commit Log</b>&emsp;&emsp;Topics, Partitioning, Log Compaction, Compression &amp; Offset Management</li>
-					<li class="fragment"><b>Real-time</b>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;High-Throughput &amp; Low-Latency</li>
-					<li class="fragment"><b>Persistence</b>&emsp;&emsp;&emsp;Scalable, centralized &amp; replicated storage</li>
+					<li class="fragment"><b>Real-time</b>&emsp;&emsp;&emsp;High-Throughput &amp; Low-Latency</li>
+					<li class="fragment"><b>Persistence</b>&emsp;&emsp;Scalable, centralized &amp; replicated storage</li>
 				</ul>
 			</section>
 			<section>
 				<h2>Related</h2>
 				<ul>
-					<li class="fragment"><b>Clients</b>&emsp;&emsp;Scala, Java, Python, Go, Perl, Erlang etc.</li>
-					<li class="fragment"><b>Integration</b>&emsp;&emsp;Storm, Samza, Hadoop, ElasticSearch, Logstash, Hive etc.</li>
-					<li class="fragment"><b>Confluent Platform</b>&emsp;&emsp;Schema Registry, REST Proxy &amp; Camus</li>
+					<li class="fragment"><b>Clients</b>&emsp;&emsp;&emsp;Scala, Java, Python, Go, Perl, Erlang etc.</li>
+					<li class="fragment"><b>Integration</b>&emsp;Storm, Samza, Hadoop, ElasticSearch, Logstash, Hive etc.</li>
+					<li class="fragment"><b>Confluent Platform</b>&emsp;Schema Registry, REST Proxy &amp; Camus</li>
+					<li class="fragment"><b>Kafka Streams</b>&emsp;&emsp;&emsp;Stream processing library vs. frameworks</li>
 				</ul>
 			</section>
 		</section>
 		<section>
 			<p>
-				<a href="http://datanerds.io" target="_blank"><img style="border: 0px; background: none; box-shadow: none;" src="img/datanerds.png"/></a><br/>
+				<a href="http://datanerds.io" target="_blank"><img width="150" style="border: 0px; background: none; box-shadow: none;" src="img/datanerds.png"/></a><br/>
 			</p>
 			<h1>Thank You!</h1>
 			<p>
+				<a href="http://twitter.com/Intuit" target="_blank">@Intuit</a><br/>
+				<a href="http://datanerds.io" target="_blank">datanerds.io</a><br/>
 				Frank Wisniewski - <a href="http://twitter.com/ultraknackig" target="_blank">@ultraknackig</a><br/>
-				Lars Pfannenschmidt - <a href="http://twitter.com/leastangle" target="_blank">@leastangle</a>
+				Lars Pfannenschmidt - <a href="http://twitter.com/leastangle" target="_blank">@leastangle</a><br/>
 			</p>
+		</section>
+		<section>
+			<div>Attributions:</div><p/>
+			<small><a href="https://flic.kr/p/81Z1JA">Angry Girl</a> by Steven Depolo - Some rights reserved <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></small>
+			<small><a href="https://flic.kr/p/9aQ5rN">Sometimes, we do puzzles...</a> by Jameel Winter - Some rights reserved <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></small>
+			<small><a href="https://flic.kr/p/i9tDQY">Programming With Biscuits</a> by fdecomite - Some rights reserved <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></small>
+			<small><a href="https://flic.kr/p/asbhA6">School Time Jet Bus</a> by Doug Wertman - Some rights reserved <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></small>
+			<small><a href="https://flic.kr/p/bEEdn3">Cockpit </a> by Roger Schultz - Some rights reserved <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></small>
+			<small><a href="https://flic.kr/p/dHPGVp">Overflowing </a> by Matti Mattila - Some rights reserved <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></small>
 		</section>
 	</div>
 </div>

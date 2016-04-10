@@ -10,10 +10,6 @@
 @import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
 @import url(https://fonts.googleapis.com/css?family=Raleway:400,500);
 @import url(https://fonts.googleapis.com/css?family=Source+Code+Pro:400,500,600,700);
-/*
-@import url(https://fonts.googleapis.com/css?family=News+Cycle:400,700);
-@import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic);
-*/
 /*********************************************
  * GLOBAL STYLES
  *********************************************/
@@ -57,7 +53,9 @@ body {
   word-wrap: break-word; }
 
 .reveal h1 {
-  font-size: 3.77em; }
+  font-size: 3.77em;
+  background-color: rgba(252, 255, 245, 0.50);
+}
 
 .reveal h2 {
   font-size: 2.11em; }
@@ -148,17 +146,17 @@ body {
 .reveal pre {
   display: block;
   position: relative;
-  width: 90%;
+  width: 100%;
   margin: 20px auto;
   text-align: left;
-  font-size: 0.55em;
-  font-family: monospace;
+  font-size: 0.45em;
+  font-family: "Source Code Pro", monospace;
   line-height: 1.2em;
   word-wrap: break-word;
   box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3); }
 
 .reveal code {
-  font-family: monospace; }
+  font-family: "Source Code Pro", monospace; }
 
 .reveal pre code {
   display: block;
@@ -302,7 +300,7 @@ body {
   }
 
   ul:not(.posneg) li:before {
-      content:'⋆';
+      content:'∗';
       display: block;
       position: relative;
       max-width: 0px;
@@ -321,4 +319,12 @@ body {
 
   .dark-font {
       color: #1E1E20;
+  }
+
+
+  .bottom_aligner {
+      display: inline-block;
+      height: 100%;
+      vertical-align: bottom;
+      width: 0px;
   }
