@@ -270,28 +270,77 @@ public RecordMetadata send(News news) throws ExecutionException, InterruptedExce
 				</section>
 
 				<section>
-					<h2>Java Consumer Thread</h2>
+					<h2>Java Consumer</h2>
 					<pre class="fragment"><code data-trim class="java">
-public void run() {
-    Thread.currentThread().setName(name);
-    ConsumerIterator&lt;String, News&gt; it = messageStream.iterator();
-    while (it.hasNext()) {
-        relayMessage(it.next());
-    }
-}
-					</code></pre>
-					<pre class="fragment"><code data-trim class="java">
-void relayMessage(MessageAndMetadata&lt;String, News&gt; kafkaMessage) {
-    logger.trace("Received message with key '{}' and offset '{}' "
-        + "on partition '{}' for topic '{}'",
-        kafkaMessage.key(), kafkaMessage.offset(),
-        kafkaMessage.partition(), kafkaMessage.topic());
-    messageConsumer.consume(kafkaMessage.message());
+public SimpleConsumer(String bootstrapServers, String groupId,
+	NewsConsumer consumer, ExceptionHandler exceptionHandler) {
+    this.bootstrapServers = bootstrapServers;
+    this....
+    this.name = String.format("%s[%s]", group, CONSUMER_THREAD_SEQUENCE.getAndIncrement());
 }
 					</code></pre>
 					<pre class="fragment"><code data-trim class="java">
 public interface NewsConsumer&lt;News&gt; {
-    void consume(News message);
+	void consume(News message);
+	String getTopic();
+}
+				</code></pre>
+				<pre class="fragment"><code data-trim class="java">
+@FunctionalInterface
+public interface ExceptionHandler {
+	void handle(Exception ex);
+}
+				</code></pre>
+					<pre class="fragment"><code data-trim class="java">
+private Consumer&gt;String, News&gt; createConsumer() {
+    Map&lt;String, Object&gt; props = new HashMap&lt;&gt;();
+    props.put(BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);  // list of broker nodes
+    props.put(GROUP_ID_CONFIG, groupId);                    // identifies consumer group
+    props.put(AUTO_OFFSET_RESET_CONFIG, "earliest");        // fallback beahaviour on invalid offset
+    props.put(ENABLE_AUTO_COMMIT_CONFIG, true);             // turn on auto-commit (default)
+    props.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    props.put(VALUE_DESERIALIZER_CLASS_CONFIG, NewsDeserializer.class);
+    props.put(CLIENT_ID_CONFIG, String.format("%s-%s", InetAddress.getLocalHost().getHostName(), name));
+
+    return new KafkaConsumer&lt;&gt;(props);
+}
+					</code></pre>
+					<aside class="notes">
+						<ul>
+							<li><b>High Level Consumer API</b> lagert das Verwalten des Offset nach ZooKeeper oder Kafka aus</li>
+							<li><b>SimpleConsumer</b> &uuml;berl&auml;sst dies der Consumer-Implementierung</li>
+							<li>Client Re-Design ist in Arbeit</li>
+						</ul>
+						Gott sei Dank gibt es die neue Java-API!
+					</aside>
+				</section>
+
+				<section>
+					<h2>Java Consumer run()</h2>
+					<pre class="fragment"><code data-trim class="java">
+@Override
+public void run() {
+    try {
+        Thread.currentThread().setName(name);
+        consumer = createConsumer();
+        consumer.subscribe(Arrays.asList(newsConsumer.getTopic()));
+        logger.info("Started consumer thread {}", name);
+        while (running) {
+            ConsumerRecords&lt;String, News&gt; records = consumer.poll(POLLING_TIMEOUT_MS);
+            records.forEach(record -> relayMessage(record));
+        }
+    } catch (Exception ex) {
+        exceptionHandler.handle(ex);
+    } finally {
+        close();
+    }
+}
+					</code></pre>
+					<pre class="fragment"><code data-trim class="java">
+private void relayMessage(ConsumerRecord&lt;String, News&gt; kafkaRecord) {
+    logger.info("Received message with key '{}' and offset '{}' on partition '{}' for topic '{}'",
+        kafkaRecord.key(), kafkaRecord.offset(), kafkaRecord.partition(), kafkaRecord.topic());
+    newsConsumer.consume(kafkaRecord.value());
 }
 					</code></pre>
 					<aside class="notes">
@@ -299,43 +348,37 @@ public interface NewsConsumer&lt;News&gt; {
 				</section>
 
 				<section>
-					<h2>Wiring</h2>
+					<h2>Consumer Pool</h2>
 					<pre class="fragment"><code data-trim class="java">
-import static kafka.consumer.Consumer.createJavaConsumerConnector;
+public void start(List&lt;NewsConsumer&gt; newsConsumers) {
+    pool = Executors.newFixedThreadPool(newsConsumers.size());
 
-Properties props = new Properties();
-props.put("zookeeper.connect", zookeeper); // list of ZooKeeper nodes
-props.put("group.id", groupId);            // identifies consumer group
-props.put("offsets.storage", "kafka");     // storage for offsets
-props.put("dual.commit.enabled", "false"); // migration switch
-...
-ConsumerConnector consumerConnector = createJavaConsumerConnector(new ConsumerConfig(props));
-					</code></pre>
-					<pre class="fragment"><code data-trim class="java">
-Map&lt;String, List&lt;KafkaStream&lt;String, News&gt;&gt;&gt; consumerMap;
-consumerMap = consumerConnector.createMessageStreams(
-    ImmutableMap.of(topic, numberOfThreads),     // number of streams per topic
-    new StringDecoder(null), new NewsDecoder()); // message key and value decoders
-
-List&lt;KafkaStream&lt;String, News&gt;&gt; streams = consumerMap.get(topic);
-					</code></pre>
-					<pre class="fragment"><code data-trim class="java">
-// create fixed size thread pool to launch all the threads
-ExecutorService pool = Executors.newFixedThreadPool(numberOfThreads);
-// create consumer threads to handle the messages
-for (final KafkaStream stream : streams) {
-    String name = String.format("%s[%s]", topic, threadNumber++);
-    pool.submit(new ConsumerThread(stream, name, consumer));
+    for (NewsConsumer newsConsumer : newsConsumers) {
+        SimpleConsumer consumer = new SimpleConsumer(bootstrapServers, groupId, newsConsumer, this);
+        consumers.add(consumer);
+        pool.submit(consumer);
+    }
 }
 					</code></pre>
-					<small class="fragment">Full Code Example: <a href="https://github.com/kafka101/java-news-feed">https://github.com/kafka101/java-news-feed</a></small>
+					<pre class="fragment"><code data-trim class="java">
+public void stop() {
+    consumers.forEach(SimpleConsumer::stop);
+    if (pool != null) {
+        pool.shutdown();
+    }
+    logger.info("Shutdown all {} threads of consumer pool", consumers.size());
+    consumers.clear();
+}
+					</code></pre>
+					<pre class="fragment"><code data-trim class="java">
+@Override
+public void handle(Exception ex) {
+    logger.error("Stopping all consumer threads due to unexpected exception.", ex);
+    stop();
+}
+					</code></pre>
+					<small class="fragment">Full Code Example: <a href="https://github.com/datanerds-io/java-news-feed">https://github.com/datanerds-io/java-news-feed</a></small>
 					<aside class="notes">
-						<ul>
-							<li><b>High Level Consumer API</b> lagert das Verwalten des Offset nach ZooKeeper oder Kafka aus</li>
-							<li><b>SimpleConsumer</b> &uuml;berl&auml;sst dies der Consumer-Implementierung</li>
-							<li>Client Re-Design ist in Arbeit</li>
-						</ul>
-						Gott sei Dank ist eine neue Java-API in Arbeit!
 					</aside>
 				</section>
 			</section>
