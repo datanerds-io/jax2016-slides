@@ -272,10 +272,9 @@ public RecordMetadata send(News news) throws ExecutionException, InterruptedExce
 				<section>
 					<h2>Java Consumer</h2>
 					<pre class="fragment"><code data-trim class="java">
-public SimpleConsumer(String bootstrapServers, String groupId,
-	NewsConsumer consumer, ExceptionHandler exceptionHandler) {
+public SimpleConsumer(String bootstrapServers, String groupId,NewsConsumer consumer) {
     this.bootstrapServers = bootstrapServers;
-    this....
+    ...
     this.name = String.format("%s[%s]", group, CONSUMER_THREAD_SEQUENCE.getAndIncrement());
 }
 					</code></pre>
@@ -284,13 +283,7 @@ public interface NewsConsumer&lt;News&gt; {
 	void consume(News message);
 	String getTopic();
 }
-				</code></pre>
-				<pre class="fragment"><code data-trim class="java">
-@FunctionalInterface
-public interface ExceptionHandler {
-	void handle(Exception ex);
-}
-				</code></pre>
+					</code></pre>
 					<pre class="fragment"><code data-trim class="java">
 private Consumer&gt;String, News&gt; createConsumer() {
     Map&lt;String, Object&gt; props = new HashMap&lt;&gt;();
@@ -330,7 +323,7 @@ public void run() {
             records.forEach(record -> relayMessage(record));
         }
     } catch (Exception ex) {
-        exceptionHandler.handle(ex);
+        logger.error("Started consumer thread", ex);
     } finally {
         close();
     }
@@ -354,7 +347,7 @@ public void start(List&lt;NewsConsumer&gt; newsConsumers) {
     pool = Executors.newFixedThreadPool(newsConsumers.size());
 
     for (NewsConsumer newsConsumer : newsConsumers) {
-        SimpleConsumer consumer = new SimpleConsumer(bootstrapServers, groupId, newsConsumer, this);
+        SimpleConsumer consumer = new SimpleConsumer(bootstrapServers, groupId, newsConsumer);
         consumers.add(consumer);
         pool.submit(consumer);
     }
@@ -368,13 +361,6 @@ public void stop() {
     }
     logger.info("Shutdown all {} threads of consumer pool", consumers.size());
     consumers.clear();
-}
-					</code></pre>
-					<pre class="fragment"><code data-trim class="java">
-@Override
-public void handle(Exception ex) {
-    logger.error("Stopping all consumer threads due to unexpected exception.", ex);
-    stop();
 }
 					</code></pre>
 					<small class="fragment">Full Code Example: <a href="https://github.com/datanerds-io/java-news-feed">https://github.com/datanerds-io/java-news-feed</a></small>
