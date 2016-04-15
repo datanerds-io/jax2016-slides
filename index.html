@@ -244,23 +244,67 @@ public RecordMetadata send(News news) throws ExecutionException, InterruptedExce
 						<b>Erinnerung:</b> Reihenfolge pro Partititon garantiert;<br> LogCompaction ohne Key?
 					</aside>
 				</section>
+
 				<section>
-					<h2>Consumer Grouping</h2>
-					<img src="img/consumer_grouping.png"/>
-					<small>“Kafka 101 - Massive Datenströme mit Apache Kafka” by Pfannenschmidt and Wisniewski, JavaMagazin 08.2015, p. 38</small>
+					<h2>Consumer Lifecycle</h2>
+					<ul>
+						<li class="fragment">Topic Subscription &amp; Partition Assignment</li>
+						<li class="fragment">Message Polling</li>
+						<li class="fragment">Partition Rebalance Handling</li>
+						<li class="fragment">Offset Management</li>
+						<li class="fragment">Shutdown</li>
+					</ul>
 					<aside class="notes">
-						Strategien zum konsumieren: <b>links</b> Queue; <b>rechts</b> Topic/publish-subscribe
 						<ul>
-							<li><b>Topic A:</b>Nachrichten <i>entweder</i> von A0 <i>oder</i> A1</li>
-							<li><b>Topic B:</b>Nachrichten <i>sowohl</i> von B0 <i>als auch</i> von einem Consumer aus Gruppe C empfangen</li>
+							<li>Partition Assignment</li>
+							<li>Poll
+								<ul><li>#threads</li></ul>
+							</li>
+							<li>Rebalance
+								<ul><li>clean up &amp; save state before losing ownership on partition</li></ul>
+							</li>
+							<li>Offset</li>
+							<li>Shutdown</li>
 						</ul>
 					</aside>
 				</section>
-
 				<section>
-					<h2>Consumer Threading</h2>
-					<img width="65%" src="img/consumer_threading.png"/>
+					<h2>Consumer Groups</h2>
+					<img src="img/consumer_grouping.png"/>
+					<small>“Kafka 101 - Massive Datenströme mit Apache Kafka” by Pfannenschmidt and Wisniewski, JavaMagazin 08.2015, p. 38</small>
+					<aside class="notes">
+						<ul>
+							<li>Dynamically add &amp; remove consumers on the fly
+								<br />&#8594; scalability &amp; availability
+								<br />&#8594; triggers rebalance
+								<br />&#8594; short window of unavailability
+								<br />&#8594; state loss
+							</li>
+							<li>Membership maintained via heartbeats to <b>one</b> broker (<i>group coordinator</i>)</li>
+							<li>Strategien zum konsumieren: <b>links</b> Queue; <b>rechts</b> Topic/publish-subscribe</li>
+							<ul>
+								<li><b>Topic A:</b>Nachrichten <i>entweder</i> von A0 <i>oder</i> A1</li>
+								<li><b>Topic B:</b>Nachrichten <i>sowohl</i> von B0 <i>als auch</i> von einem Consumer aus Gruppe C empfangen</li>
+							</ul>
+						</li>
+					</ul>
+					</aside>
+				</section>
+				<section>
+					<h2>Partition Assignment</h2>
+					<img width="65%" src="img/partition_assignment_1.png"/>
 					<small>“Kafka 101 - Massive Datenströme mit Apache Kafka” by Pfannenschmidt and Wisniewski, JavaMagazin 08.2015, p. 41</small>
+					<aside class="notes">
+						<ul>
+							<li>#Threads &gt; #Paritions &rarr; &uuml;bersch&uuml;ssigen Threads erhalten keine Nachrichten (siehe T0)</li>
+							<li>#Threads &lt; #Paritions &rarr; Threads bekommen Nachrichten von mehreren Partitionen &rarr; <b>keine Order mehr!!</b></li>
+						</ul>
+					</aside>
+				</section>
+				<section>
+					<h2>Partition Assignment</h2>
+					<img width="65%" src="img/partition_assignment_2.png"/>
+					<small>Assignment algorithm configurable via consumer parameter <code data-trim class="java">partition.assignment.strategy</code></small>
 					<aside class="notes">
 						<ul>
 							<li>#Threads &gt; #Paritions &rarr; &uuml;bersch&uuml;ssigen Threads erhalten keine Nachrichten (siehe T0)</li>
