@@ -293,12 +293,8 @@ public RecordMetadata send(News news) throws ExecutionException, InterruptedExce
 				<section>
 					<h2>Partition Assignment</h2>
 					<img width="65%" src="img/partition_assignment_1.png"/>
-					<small>“Kafka 101 - Massive Datenströme mit Apache Kafka” by Pfannenschmidt and Wisniewski, JavaMagazin 08.2015, p. 41</small>
 					<aside class="notes">
-						<ul>
-							<li>#Threads &gt; #Paritions &rarr; &uuml;bersch&uuml;ssigen Threads erhalten keine Nachrichten (siehe T0)</li>
-							<li>#Threads &lt; #Paritions &rarr; Threads bekommen Nachrichten von mehreren Partitionen &rarr; <b>keine Order mehr!!</b></li>
-						</ul>
+						<li>#Consumer &gt; #Partitionen &rarr; &uuml;bersch&uuml;ssigen Consumer erhalten keine Nachrichten
 					</aside>
 				</section>
 				<section>
@@ -306,20 +302,17 @@ public RecordMetadata send(News news) throws ExecutionException, InterruptedExce
 					<img width="65%" src="img/partition_assignment_2.png"/>
 					<small>Assignment algorithm configurable via consumer parameter <code data-trim class="java">partition.assignment.strategy</code></small>
 					<aside class="notes">
-						<ul>
-							<li>#Threads &gt; #Paritions &rarr; &uuml;bersch&uuml;ssigen Threads erhalten keine Nachrichten (siehe T0)</li>
-							<li>#Threads &lt; #Paritions &rarr; Threads bekommen Nachrichten von mehreren Partitionen &rarr; <b>keine Order mehr!!</b></li>
-						</ul>
+						#Consumer &lt; #Partitionen &rarr; Consumer bekommen Nachrichten von mehreren Partitionen.
 					</aside>
 				</section>
 
 				<section>
 					<h2>Java Consumer</h2>
 					<pre class="fragment"><code data-trim class="java">
-public SimpleConsumer(String bootstrapServers, String groupId,NewsConsumer consumer) {
+public SimpleConsumer(String bootstrapServers, String groupId, NewsConsumer consumer) {
     this.bootstrapServers = bootstrapServers;
     ...
-    this.name = String.format("%s[%s]", group, CONSUMER_THREAD_SEQUENCE.getAndIncrement());
+    this.name = String.format("%s[%s]", groupId, CONSUMER_SEQUENCE.getAndIncrement());
 }
 					</code></pre>
 					<pre class="fragment"><code data-trim class="java">
@@ -329,7 +322,7 @@ public interface NewsConsumer&lt;News&gt; {
 }
 					</code></pre>
 					<pre class="fragment"><code data-trim class="java">
-private Consumer&gt;String, News&gt; createConsumer() {
+private Consumer&lt;String, News&gt; createConsumer() {
     Map&lt;String, Object&gt; props = new HashMap&lt;&gt;();
     props.put(BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);  // list of broker nodes
     props.put(GROUP_ID_CONFIG, groupId);                    // identifies consumer group
@@ -337,18 +330,22 @@ private Consumer&gt;String, News&gt; createConsumer() {
     props.put(ENABLE_AUTO_COMMIT_CONFIG, true);             // turn on auto-commit (default)
     props.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     props.put(VALUE_DESERIALIZER_CLASS_CONFIG, NewsDeserializer.class);
-    props.put(CLIENT_ID_CONFIG, String.format("%s-%s", InetAddress.getLocalHost().getHostName(), name));
+    props.put(CLIENT_ID_CONFIG, getClientId());
 
     return new KafkaConsumer&lt;&gt;(props);
 }
 					</code></pre>
 					<aside class="notes">
 						<ul>
-							<li><b>High Level Consumer API</b> lagert das Verwalten des Offset nach ZooKeeper oder Kafka aus</li>
-							<li><b>SimpleConsumer</b> &uuml;berl&auml;sst dies der Consumer-Implementierung</li>
-							<li>Client Re-Design ist in Arbeit</li>
+							<li>3 APIs
+								<ul>
+									<li><b>High Level Consumer API</b> lagert das Verwalten des Offset nach ZooKeeper oder Kafka aus</li>
+									<li><b>SimpleConsumer</b> &uuml;berl&auml;sst dies der Consumer-Implementierung</li>
+									<li>Hier: neue API 0.9</li>
+								</ul>
+								<li>new KafkaConsumer&lt;&gt;(props); schmeißt unchecked Exception.</li>
 						</ul>
-						Gott sei Dank gibt es die neue Java-API!
+
 					</aside>
 				</section>
 
@@ -381,6 +378,7 @@ private void relayMessage(ConsumerRecord&lt;String, News&gt; kafkaRecord) {
 }
 					</code></pre>
 					<aside class="notes">
+						poll ist nicht thread-safe: nebenläufiger Aufruf schmeißt Exception
 					</aside>
 				</section>
 
@@ -525,7 +523,7 @@ public void stop() {
 				<h2>Related</h2>
 				<ul>
 					<li class="fragment"><b>Clients</b>&emsp;&emsp;&emsp;Scala, Java, Python, Go, Perl, Erlang etc.</li>
-					<li class="fragment"><b>Integration</b>&emsp;Storm, Samza, Hadoop, ElasticSearch, Logstash, Hive etc.</li>
+					<li class="fragment"><b>Integration</b>&emsp;Spark, Storm, Samza, Hadoop, ElasticSearch, Logstash, Hive etc.</li>
 					<li class="fragment"><b>Confluent Platform</b>&emsp;Schema Registry, REST Proxy &amp; Camus</li>
 					<li class="fragment"><b>Kafka Streams</b>&emsp;&emsp;&emsp;Stream processing library vs. frameworks</li>
 				</ul>
