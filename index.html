@@ -323,7 +323,7 @@ public interface NewsConsumer&lt;News&gt; {
 					</code></pre>
 					<pre class="fragment"><code data-trim class="java">
 private Consumer&lt;String, News&gt; createConsumer() {
-    Map&lt;String, Object&gt; props = new HashMap&lt;&gt;();
+    Properties props = new Properties();
     props.put(BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);  // list of broker nodes
     props.put(GROUP_ID_CONFIG, groupId);                    // identifies consumer group
     props.put(AUTO_OFFSET_RESET_CONFIG, "earliest");        // fallback beahaviour on invalid offset
