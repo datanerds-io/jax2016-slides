@@ -150,7 +150,7 @@
 					<img src="img/topic.png"/>
 					<small>Anatomy of a topic according to <a href="http://kafka.apache.org/documentation.html">Kafka documentation</a></small>
 					<aside class="notes">
-						Nachrichten &rarr; Topic; <br/>durable;<br/> n Partitionen und Knoten verteilt;<br/> sequentiell;<br/> Offset pro partition;<br/> Replikation; Retention;<br/>
+						Nachrichten &rarr; Topic; <br/>durable;<br/> n Partitionen und Knoten verteilt;<br/> sequentiell;<br/> Offset/Order pro partition;<br/> Replikation; Retention;<br/>
 						<b>Obacht:</b> Partitionen Nachtr&auml;gliches &Auml;ndern :(
 					</aside>
 				</section>
@@ -505,7 +505,7 @@ public void stop() {
 					<li class="fragment"><code>unclean.leader.election.enable=false</code></li>
 				</ul>
 				<aside class="notes">
-					Jepsen? Kyle Kingsbury 
+					Jepsen? Kyle Kingsbury
 				</aside>
 			</section>
 			<section>
