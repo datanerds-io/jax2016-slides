@@ -114,8 +114,24 @@
 					<img src="img/datapipeline_simple.jpg"/>
 					<small><a href="http://linkd.in/199iMwY">„The Log: What every software engineer should know about real­time data's unifying abstraction“</a> by Jay Kreps</small>
 					<aside class="notes">
-						entkoppeltes Nachrichtensystem; klassisches funktionierte nicht; wurde LinkedIn's “zentralen Nervensystem”<br/>
+						entkoppeltes Nachrichtensystem; klassisches funktionierte nicht; wurde LinkedIn's “zentralen Nervensystem”
+					</aside>
+				</section>
+				<section>
+					<h2>Required Guarantees</h2>
+					<ul>
+						<li class="fragment">low latency</li>
+						<li class="fragment">scalable</li>
+						<li class="fragment">fault-tolerant</li>
+					</ul>
+					<small><blockquote cite="https://www.linkedin.com/pulse/20141106180403-2945786-announcing-confluent-a-company-for-apache-kafka-and-realtime-data">"None were built like a modern distributed system that you could safely dump all the data of a growing company into and scale along with your needs."</blockquote></small>
+					<aside class="notes">
 						Kernanforderungen: <b>Latenz, Skalierbarkeit, Fehlertoleranz &amp; Verfügbarkeit</b>
+						<ul>
+							<li>low latency enough to satisfy our realtime data flows</li>
+							<li>scalable enough to handle very high volume log and event data</li>
+							<li>fault-tolerant enough for critical data delivery -> durable persistence</li>
+						</ul>
 					</aside>
 				</section>
 			</section>
