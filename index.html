@@ -185,6 +185,7 @@ $ kafka-configs.sh --zookeeper 127.0.0.1:2181 --alter
 			<section>
 				<section data-background="img/example.jpg">
 					<!--<h1>Example</h1>-->
+					<p/>
 				</section>
 				<section>
 					<h2>Java Producer</h2>
@@ -422,9 +423,11 @@ public void stop() {
 					<h2>What makes Kafka fast?</h2>
 					<blockquote cite="http://kafka.apache.org/documentation.html#maximizingefficiency">"[Designed] to make consumption as cheap as possible"</blockquote>
 					<aside class="notes">
-						Teure Probleme beim Messaging:<br>
-						Exactly once &rarr; At least once<br>
-						Order &rarr; Partitions
+						Teure Probleme beim Messaging:<br/>
+						Exactly once &rarr; At least once<br/>
+						Order &rarr; Partitions<br/>
+						ActiveMQ cross consumption #fail<br/>
+						Rein Z&uuml;f&auml;llig Messaging<br/>
 					</aside>
 				</section>
 				<section>
@@ -480,13 +483,13 @@ public void stop() {
 			<section>
 				<h2>Broker</h2>
 				<ul>
-					<li class="fragment"><code>-XX:+UseG1GC</code> FTW</li>
-					<li class="fragment"><code>unclean.leader.election.enable=false</code></li>
+					<li class="fragment"><code>-XX:+UseG1GC</code></li>
 					<li class="fragment"><code>default.replication.factor=3</code></li>
-					<li class="fragment"><code>min.insync.replicas=2</code></li>
+					<li class="fragment"><code>min.insync.replicas=2 (ISR)</code></li>
+					<li class="fragment"><code>unclean.leader.election.enable=false</code></li>
 				</ul>
 				<aside class="notes">
-					Jepsen?
+					Jepsen? Kyle Kingsbury 
 				</aside>
 			</section>
 			<section>
@@ -503,7 +506,8 @@ public void stop() {
 					<li class="fragment"><code>enable.auto.commit=false</code></li>
 				</ul>
 				<aside class="notes">
-					Commit after processing
+					In Flight -> Frank Nachricht 1 überholt 2<br/>
+					Commit NACH erfolgreicher verarbeitung
 				</aside>
 			</section>
 		</section>
