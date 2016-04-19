@@ -231,7 +231,13 @@ public RecordMetadata send(News news) throws ExecutionException, InterruptedExce
 						</li>
 					</ul>
 					<aside class="notes">
-						<b>Erinnerung:</b> Reihenfolge pro Partititon garantiert;<br> LogCompaction ohne Key?
+						<b>Erinnerung:</b> Reihenfolge pro Partititon garantiert
+						<ol>
+							<li>Keine Reihenfolge</li>
+							<li></li>
+							<li></li>
+						</ol>
+						LogCompaction ohne Key?
 					</aside>
 				</section>
 
@@ -533,18 +539,18 @@ $ kafka-configs.sh --zookeeper 127.0.0.1:2181 --alter
 			<section>
 				<h2>Key Features &amp; Facts</h2>
 				<ul>
-					<li class="fragment"><b>Commit Log</b>&emsp;&emsp;Topics, Partitioning, Log Compaction, Compression &amp; Offset Management</li>
-					<li class="fragment"><b>Real-time</b>&emsp;&emsp;&emsp;High-Throughput &amp; Low-Latency</li>
-					<li class="fragment"><b>Persistence</b>&emsp;&emsp;Scalable, centralized &amp; replicated storage</li>
+					<li class="fragment"><table width="100%"><tr><td width="28%"><b>Commit Log</b></td><td>Topics, Partitioning, Log Compaction, Compression &amp; Offset Management</td></tr></table></li>
+					<li class="fragment"><table width="100%"><tr><td width="28%"><b>Real-time</b></td><td>High-Throughput &amp; Low-Latency</td></tr></table></li>
+					<li class="fragment"><table width="100%"><tr><td width="28%"><b>Persistence</b></td><td>Scalable, centralized &amp; replicated storage</td></tr></table></li>
 				</ul>
 			</section>
 			<section>
 				<h2>Related</h2>
 				<ul>
-					<li class="fragment"><b>Clients</b>&emsp;&emsp;&emsp;Scala, Java, Python, Go, Perl, Erlang etc.</li>
-					<li class="fragment"><b>Integration</b>&emsp;Spark, Storm, Samza, Hadoop, ElasticSearch, Logstash, Hive etc.</li>
-					<li class="fragment"><b>Confluent Platform</b>&emsp;Schema Registry, REST Proxy &amp; Camus</li>
-					<li class="fragment"><b>Kafka Streams</b>&emsp;&emsp;&emsp;Stream processing library vs. frameworks</li>
+					<li class="fragment"><table width="100%"><tr><td width="28%"><b>Clients</b></td><td>Scala, Java, Python, Go, Perl, Erlang etc.</td></tr></table></li>
+					<li class="fragment"><table width="100%"><tr><td width="28%"><b>Integration</b></td><td>Spark, Storm, Samza, Hadoop, ElasticSearch, Logstash, Hive etc.</td></tr></table></li>
+					<li class="fragment"><table width="100%"><tr><td width="28%"><b>Confluent Platform</b></td><td>Schema Registry, REST Proxy &amp; Camus</td></tr></table></li>
+					<li class="fragment"><table width="100%"><tr><td width="28%"><b>Kafka Streams</b></td><td>Stream processing library vs. frameworks</td></tr></table></li>
 				</ul>
 			</section>
 		</section>
@@ -556,6 +562,7 @@ $ kafka-configs.sh --zookeeper 127.0.0.1:2181 --alter
 			<p>
 				<a href="http://twitter.com/Intuit" target="_blank">@Intuit</a><br/>
 				<a href="http://datanerds.io" target="_blank">datanerds.io</a><br/>
+				<a href="http://github.com/datanerds-io/" target="_blank">github.com/datanerds-io/</a><br/>
 				Frank Wisniewski - <a href="http://twitter.com/ultraknackig" target="_blank">@ultraknackig</a><br/>
 				Lars Pfannenschmidt - <a href="http://twitter.com/leastangle" target="_blank">@leastangle</a><br/>
 			</p>
