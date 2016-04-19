@@ -97,7 +97,7 @@
 				<section data-background="img/motivation.jpg">
 					<h1>Motivation</h1>
 					<aside class="notes">
-						"WTF! Y? gibt doch schon messaging was super und toll auch ist...", interns Projekt LinkedIn; einheitliche Plattform zur Verarbeitung von großen Datenströmen;
+						"WTF! Y? Es gibt doch schon Messaging Broker wie bspw. ActiveMQ oder RabbitMQ!"
 					</aside>
 				</section>
 				<section>
@@ -105,7 +105,10 @@
 					<img src="img/datapipeline_complex.jpg"/>
 					<small><a href="http://linkd.in/199iMwY">„The Log: What every software engineer should know about real­time data's unifying abstraction“</a> by Jay Kreps</small>
 					<aside class="notes">
-						uni-/bidirektionale Abhaenigkeiten (Daten) kreuz und quer; Unwartbar
+						<ul>
+							<li>internes LinkedIn-Projekt</li>
+							<li>uni-/bidirektionale Abhaenigkeiten, Daten kreuz und quer übermittelt</li>
+						  <li>Unwartbares Chaos</li>
 					</aside>
 				</section>
 				<section>
@@ -113,24 +116,28 @@
 					<img src="img/datapipeline_simple.jpg"/>
 					<small><a href="http://linkd.in/199iMwY">„The Log: What every software engineer should know about real­time data's unifying abstraction“</a> by Jay Kreps</small>
 					<aside class="notes">
-						entkoppeltes Nachrichtensystem; klassisches funktionierte nicht; wurde LinkedIn's “zentralen Nervensystem”
+						<ul>
+							<li>einheitliche Plattform zur Verarbeitung von großen Datenströmen</li>
+							<li>entkoppeltes Nachrichtensystem</li>
+							<li>LinkedIn's “zentralen Nervensystem”</li>
 					</aside>
 				</section>
 				<section>
 					<h2>Required Guarantees</h2>
 					<ul>
-						<li class="fragment">low latency</li>
-						<li class="fragment">scalable</li>
-						<li class="fragment">fault-tolerant</li>
+						<li>low latency</li>
+						<li>scalable</li>
+						<li>fault-tolerant</li>
 					</ul>
 					<small><blockquote cite="https://www.linkedin.com/pulse/20141106180403-2945786-announcing-confluent-a-company-for-apache-kafka-and-realtime-data">"None were built like a modern distributed system that you could safely dump all the data of a growing company into and scale along with your needs."</blockquote></small>
 					<aside class="notes">
 						Kernanforderungen: <b>Latenz, Skalierbarkeit, Fehlertoleranz &amp; Verfügbarkeit</b>
 						<ul>
-							<li>low latency enough to satisfy our realtime data flows</li>
-							<li>scalable enough to handle very high volume log and event data</li>
-							<li>fault-tolerant enough for critical data delivery -> durable persistence</li>
+							<li>Latenz: Echtzeit-Anwendungsfälle dienen</li>
+							<li>Skalierbarkeit: Sehr große Eventlogs und Daten</li>
+							<li>Fehlertoleranz &amp; Verfügbarkeit: kritische Infrstruktur bzw. Daten -> <i>durable</i> Persistenz</li>
 						</ul>
+						Klassische Message-Broker können Erfüllung der Anforderungen nicht zufriedenstellend garantieren
 					</aside>
 				</section>
 			</section>
@@ -547,10 +554,10 @@ $ kafka-configs.sh --zookeeper 127.0.0.1:2181 --alter
 			<section>
 				<h2>Related</h2>
 				<ul>
-					<li class="fragment"><table width="100%"><tr><td width="28%"><b>Clients</b></td><td>Scala, Java, Python, Go, Perl, Erlang etc.</td></tr></table></li>
-					<li class="fragment"><table width="100%"><tr><td width="28%"><b>Integration</b></td><td>Spark, Storm, Samza, Hadoop, ElasticSearch, Logstash, Hive etc.</td></tr></table></li>
-					<li class="fragment"><table width="100%"><tr><td width="28%"><b>Confluent Platform</b></td><td>Schema Registry, REST Proxy &amp; Camus</td></tr></table></li>
-					<li class="fragment"><table width="100%"><tr><td width="28%"><b>Kafka Streams</b></td><td>Stream processing library vs. frameworks</td></tr></table></li>
+					<li><table width="100%"><tr><td width="28%"><b>Clients</b></td><td>Scala, Java, Python, Go, Perl, Erlang etc.</td></tr></table></li>
+					<li><table width="100%"><tr><td width="28%"><b>Integration</b></td><td>Spark, Storm, Samza, Hadoop, ElasticSearch, Logstash, Hive etc.</td></tr></table></li>
+					<li><table width="100%"><tr><td width="28%"><b>Confluent Platform</b></td><td>Schema Registry, REST Proxy &amp; Camus</td></tr></table></li>
+					<li><table width="100%"><tr><td width="28%"><b>Kafka Streams</b></td><td>Stream processing library vs. frameworks</td></tr></table></li>
 				</ul>
 			</section>
 		</section>
