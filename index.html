@@ -78,7 +78,6 @@
 							<li>Topics &amp; Partitions</li>
 							<li>Offset Management</li>
 							<li>Log Compaction</li>
-							<li>Quotas</li>
 						</ul>
 					</div>
 					<div class="fragment">
@@ -168,32 +167,6 @@
 					<small>Log compaction according to <a href="http://kafka.apache.org/documentation.html">Kafka documentation</a></small>
 					<aside class="notes">
 						Compression nicht m&ouml;glich
-					</aside>
-				</section>
-				<section>
-					<h2>Quotas</h2>
-					<ul>
-						<li class="fragment">
-							Set Broker default (in bytes/sec)
-							<pre><code data-trim class="bash">
-quota.producer.default=10485760
-quota.consumer.default=10485760
-							</code></pre>
-						</li>
-						<li class="fragment">
-							 Custom quotas per client
-							<pre><code data-trim class="bash">
-$ kafka-configs.sh --zookeeper 127.0.0.1:2181 --alter
---add-config 'producer_byte_rate=4096,consumer_byte_rate=4096'
---entity-name client123 --entity-type clients
-							</code></pre>
-						</li>
-					</ul>
-					<div>
-						<small class="fragment">Don't forget to set the client id :)</small>
-					</div>
-					<aside class="notes">
-						Shared Infrastructure, bad clients, DoS. Quote is per Broker, not Cluster!
 					</aside>
 				</section>
 			</section>
@@ -524,6 +497,32 @@ public void stop() {
 				<aside class="notes">
 					In Flight -> Frank Nachricht 1 überholt 2<br/>
 					Commit NACH erfolgreicher verarbeitung
+				</aside>
+			</section>
+			<section>
+				<h2>Quotas</h2>
+				<ul>
+					<li class="fragment">
+						Set Broker default (in bytes/sec)
+						<pre><code data-trim class="bash">
+quota.producer.default=10485760
+quota.consumer.default=10485760
+						</code></pre>
+					</li>
+					<li class="fragment">
+						 Custom quotas per client
+						<pre><code data-trim class="bash">
+$ kafka-configs.sh --zookeeper 127.0.0.1:2181 --alter
+--add-config 'producer_byte_rate=4096,consumer_byte_rate=4096'
+--entity-name client123 --entity-type clients
+						</code></pre>
+					</li>
+				</ul>
+				<div>
+					<small class="fragment">Don't forget to set the client id :)</small>
+				</div>
+				<aside class="notes">
+					Shared Infrastructure, bad clients, DoS. Quote is per Broker, not Cluster!
 				</aside>
 			</section>
 		</section>
