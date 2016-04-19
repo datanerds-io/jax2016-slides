@@ -209,8 +209,10 @@ public RecordMetadata send(News news) throws ExecutionException, InterruptedExce
 }
 					</code></pre>
 					<aside class="notes">
-						SourceCode zu klein? Folien bereitgestellt!<br>
-						Kafka &rarr; byte[]<br> Domäne benötigt eigene <b>De-/Serializer</b>
+						<ul>
+							<li>byte[] &rarr; Broker &#8660; Domäne benötigt eigene <b>De-/Serializer</b></li>
+							<li>send() gibt Future zurück, ist also asynchron. <i>Hier:</i> blockierend durch Future::get
+						</ul>
 					</aside>
 				</section>
 
@@ -240,35 +242,10 @@ public RecordMetadata send(News news) throws ExecutionException, InterruptedExce
 					<aside class="notes">
 						<b>Erinnerung:</b> Reihenfolge pro Partititon garantiert
 						<ol>
-							<li>Keine Reihenfolge</li>
-							<li></li>
-							<li></li>
+							<li>Keine Reihenfolge, keine <i>compaction</i></li>
+							<li>automatische Lastverteilung über Partitionen &amp; <i>log compaction</i></li>
+							<li>Unterschiedliche Schlüssel für <i>log compaction</i> und Partitionierung</li>
 						</ol>
-						LogCompaction ohne Key?
-					</aside>
-				</section>
-
-				<section>
-					<h2>Consumer Lifecycle</h2>
-					<ul>
-						<li class="fragment">Topic Subscription &amp; Partition Assignment</li>
-						<li class="fragment">Message Polling</li>
-						<li class="fragment">Partition Rebalance Handling</li>
-						<li class="fragment">Offset Management</li>
-						<li class="fragment">Shutdown</li>
-					</ul>
-					<aside class="notes">
-						<ul>
-							<li>Partition Assignment</li>
-							<li>Poll
-								<ul><li>#threads</li></ul>
-							</li>
-							<li>Rebalance
-								<ul><li>clean up &amp; save state before losing ownership on partition</li></ul>
-							</li>
-							<li>Offset</li>
-							<li>Shutdown</li>
-						</ul>
 					</aside>
 				</section>
 				<section>
@@ -308,7 +285,27 @@ public RecordMetadata send(News news) throws ExecutionException, InterruptedExce
 						#Consumer &lt; #Partitionen &rarr; Consumer bekommen Nachrichten von mehreren Partitionen.
 					</aside>
 				</section>
-
+				<section>
+					<h2>Consumer Lifecycle</h2>
+					<img width="60%" src="img/consumer_lifecycle.png"/>
+					<small>Schematic representation of consumer lifecycle</small>
+					<aside class="notes">
+						<ul>
+							<li>Subscription setzt Flag zum Rebalancing (beim manuelles Assignment nicht)</li>
+							<li>Polling loop
+								<ul>
+									<li>im poll ggf rebalance</li>
+									<li>Anzahl der processing threads</li>
+									<li>offset management</li>
+								</ul>
+							</li>
+							<li>Rebalance
+								<ul><li>clean up &amp; save state before losing ownership on partition</li></ul>
+							</li>
+							<li>Shutdown</li>
+						</ul>
+					</aside>
+				</section>
 				<section>
 					<h2>Java Consumer</h2>
 					<pre class="fragment"><code data-trim class="java">
